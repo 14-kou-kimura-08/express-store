@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品管理システム</title>
+
+    <link rel="stylesheet" href="/admin/products/index.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/admin/products">商品管理</a></li>
+                <li><a href="/admin/orders">注文管理</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>商品管理</h1>
+        <a href="/admin/products/new" class="new-product-button">新規作成</a>
+
+        <% if (errorMessage) { %>
+            <div style="color: red;"><%= errorMessage %></div>
+        <% } else { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>id</th>
+                        <th>商品名</th>
+                        <th>金額</th>
+                        <th>画像</th>
+                        <th>在庫数</th>
+                        <th>編集</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach((product) => { %>
+                    <tr>
+                        <td><%= product.id %></td>
+                        <td><%= product.name %></td>
+                        <td><%= product.price %></td>
+                        <td><img src="<%= product.image_url %>" alt="<%= product.name %>" class="product-image"></td>
+                        <td><%= product.stock %></td>
+                        <td><a href="/admin/products/edit/<%= product.id %>">編集</a></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        <% } %>
+    </main>
+</body>
+
+</html>
