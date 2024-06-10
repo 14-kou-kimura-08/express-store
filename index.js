@@ -1,19 +1,20 @@
-import express from 'express';
-import { sql } from '@vercel/postgres';
-import dotenv from 'dotenv';
+import express from "express";
+import { sql } from "@vercel/postgres";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 
-app.use(express.json())
-app.use(express.static('public'));
+app.use(express.json());
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
+app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 // ECサイトのルーティング
-app.get('/', async (req, res) => {
+app.get("/", async (req, res) => {
     let errorMessage = "";
     let products = [];
 
@@ -27,10 +28,10 @@ app.get('/', async (req, res) => {
         errorMessage = error.message;
     }
 
-    res.render('index.ejs', { products: products, errorMessage: errorMessage });
+    res.render("index.ejs", { products: products, errorMessage: errorMessage });
 });
 
-app.get('/:id', async (req, res) => {
+app.get("/:id", async (req, res) => {
     let errorMessage = "";
     let product = {};
 
@@ -40,7 +41,7 @@ app.get('/:id', async (req, res) => {
         `;
 
         if (data.rows.length === 0) {
-            throw new Error('商品が見つかりませんでした');
+            throw new Error("商品が見つかりませんでした");
         }
 
         product = data.rows[0];
@@ -48,11 +49,11 @@ app.get('/:id', async (req, res) => {
         errorMessage = error.message;
     }
 
-    res.render('detail.ejs', { product: product, errorMessage: errorMessage });
+    res.render("detail.ejs", { product: product, errorMessage: errorMessage });
 });
 
 // 商品管理画面のルーティング
-app.get('/admin/products', async (req, res) => {
+app.get("/admin/products", async (req, res) => {
     let errorMessage = "";
     let products = [];
 
@@ -66,20 +67,23 @@ app.get('/admin/products', async (req, res) => {
         errorMessage = error.message;
     }
 
-    res.render('admin/products/index.ejs', { products: products, errorMessage: errorMessage });
+    res.render("admin/products/index.ejs", {
+        products: products,
+        errorMessage: errorMessage,
+    });
 });
 
-app.get('/admin/products/new', async (req, res) => {
-    res.render('admin/products/new.ejs', { errorMessage: "" });
+app.get("/admin/products/new", async (req, res) => {
+    res.render("admin/products/new.ejs", { errorMessage: "" });
 });
 
-app.post('/admin/products/create', async (req, res) => {
+app.post("/admin/products/create", async (req, res) => {
     const { name, price, image_url, stock, description } = req.body;
 
-    const formattedPrice = price === '' ? null : price;
-    const formattedImageUrl = image_url === '' ? null : image_url;
-    const formattedStock = stock === '' ? null : stock;
-    const formattedDescription = description === '' ? null : description;
+    const formattedPrice = price === "" ? null : price;
+    const formattedImageUrl = image_url === "" ? null : image_url;
+    const formattedStock = stock === "" ? null : stock;
+    const formattedDescription = description === "" ? null : description;
 
     try {
         await sql`
@@ -87,13 +91,13 @@ app.post('/admin/products/create', async (req, res) => {
             VALUES (${name}, ${formattedPrice}, ${formattedImageUrl}, ${formattedStock}, ${formattedDescription});
         `;
 
-        res.redirect('/admin/products');
+        res.redirect("/admin/products");
     } catch (error) {
-        res.render('admin/products/new.ejs', { errorMessage: error.message });
+        res.render("admin/products/new.ejs", { errorMessage: error.message });
     }
 });
 
-app.get('/admin/products/edit/:id', async (req, res) => {
+app.get("/admin/products/edit/:id", async (req, res) => {
     let errorMessage = "";
     let product = {};
 
@@ -103,7 +107,7 @@ app.get('/admin/products/edit/:id', async (req, res) => {
         `;
 
         if (data.rows.length === 0) {
-            throw new Error('商品が見つかりませんでした');
+            throw new Error("商品が見つかりませんでした");
         }
 
         product = data.rows[0];
@@ -111,16 +115,19 @@ app.get('/admin/products/edit/:id', async (req, res) => {
         errorMessage = error.message;
     }
 
-    res.render('admin/products/edit.ejs', { product: product, errorMessage: errorMessage });
+    res.render("admin/products/edit.ejs", {
+        product: product,
+        errorMessage: errorMessage,
+    });
 });
 
-app.post('/admin/products/update/:id', async (req, res) => {
+app.post("/admin/products/update/:id", async (req, res) => {
     const { name, price, image_url, stock, description } = req.body;
 
-    const formattedPrice = price === '' ? null : price;
-    const formattedImageUrl = image_url === '' ? null : image_url;
-    const formattedStock = stock === '' ? null : stock;
-    const formattedDescription = description === '' ? null : description;
+    const formattedPrice = price === "" ? null : price;
+    const formattedImageUrl = image_url === "" ? null : image_url;
+    const formattedStock = stock === "" ? null : stock;
+    const formattedDescription = description === "" ? null : description;
 
     try {
         await sql`
@@ -129,7 +136,7 @@ app.post('/admin/products/update/:id', async (req, res) => {
             WHERE id = ${req.params.id};
         `;
 
-        res.redirect('/admin/products/');
+        res.redirect("/admin/products/");
     } catch (error) {
         const product = {
             id: req.params.id,
@@ -137,14 +144,17 @@ app.post('/admin/products/update/:id', async (req, res) => {
             price,
             image_url,
             stock,
-            description
-        }
-        res.render('admin/products/edit.ejs', { product: product, errorMessage: error.message });
+            description,
+        };
+        res.render("admin/products/edit.ejs", {
+            product: product,
+            errorMessage: error.message,
+        });
     }
 });
 
 // 注文管理画面のルーティング
-app.get('/admin/orders', async (req, res) => {
+app.get("/admin/orders", async (req, res) => {
     let errorMessage = "";
     let orders = [];
 
@@ -158,10 +168,13 @@ app.get('/admin/orders', async (req, res) => {
         errorMessage = error.message;
     }
 
-    res.render('admin/orders/index.ejs', { orders: orders, errorMessage: errorMessage });
+    res.render("admin/orders/index.ejs", {
+        orders: orders,
+        errorMessage: errorMessage,
+    });
 });
 
-app.post('/order', async (req, res) => {
+app.post("/order", async (req, res) => {
     try {
         await sql`BEGIN`;
 
@@ -182,7 +195,7 @@ app.post('/order', async (req, res) => {
 
         return response.status(201).json({ order: addOrderResult.rows[0] });
     } catch (error) {
-        await sql`ROLLBACK;`
+        await sql`ROLLBACK;`;
         return response.status(500).json({ error: error.message });
     }
 });
