@@ -9,7 +9,6 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 
 // __dirnameの代替を設定
@@ -19,6 +18,8 @@ const __dirname = path.dirname(__filename);
 // ビューエンジンの設定
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // ECサイトのルーティング
 app.get("/", async (req, res) => {
