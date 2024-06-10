@@ -1,6 +1,7 @@
 import express from "express";
 import { sql } from "@vercel/postgres";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
