@@ -19,7 +19,7 @@ const __dirname = path.dirname(__filename);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
 // ECサイトのルーティング
 app.get("/", async (req, res) => {
@@ -37,6 +37,10 @@ app.get("/", async (req, res) => {
     }
 
     res.render("index.ejs", { products: products, errorMessage: errorMessage });
+});
+
+app.get("/thanks", async (req, res) => {
+    res.render("thanks.ejs");
 });
 
 app.get("/:id", async (req, res) => {
@@ -58,6 +62,37 @@ app.get("/:id", async (req, res) => {
     }
 
     res.render("detail.ejs", { product: product, errorMessage: errorMessage });
+});
+
+app.post("/order", async (req, res) => {
+    const { product_id } = req.body;
+    const quantity = 1;
+
+    try {
+        await sql`BEGIN`;
+
+        await sql`
+            UPDATE products
+            SET stock = stock - ${quantity} 
+            WHERE id = ${product_id};
+        `;
+
+        await sql`
+            INSERT INTO orders (product_id, quantity, order_date) 
+            VALUES (${product_id}, ${quantity}, NOW());
+        `;
+
+        await sql`COMMIT`;
+
+        res.redirect("/thanks");
+    } catch (error) {
+        await sql`ROLLBACK;`;
+        res.render("error.ejs", {
+            errorMessage: error.message,
+            link_url: `/${product_id}`,
+            page_name: "商品ページ",
+        });
+    }
 });
 
 // 商品管理画面のルーティング
@@ -82,7 +117,7 @@ app.get("/admin/products", async (req, res) => {
 });
 
 app.get("/admin/products/new", async (req, res) => {
-    res.render("admin/products/new.ejs", { errorMessage: "" });
+    res.render("admin/products/new.ejs");
 });
 
 app.post("/admin/products/create", async (req, res) => {
@@ -101,7 +136,11 @@ app.post("/admin/products/create", async (req, res) => {
 
         res.redirect("/admin/products");
     } catch (error) {
-        res.render("admin/products/new.ejs", { errorMessage: error.message });
+        res.render("error.ejs", {
+            errorMessage: error.message,
+            link_url: "/admin/products/new",
+            page_name: "商品追加ページ",
+        });
     }
 });
 
@@ -139,24 +178,17 @@ app.post("/admin/products/update/:id", async (req, res) => {
 
     try {
         await sql`
-            UPDATE products 
+            UPDATE products
             SET name = ${name}, price = ${formattedPrice}, image_url = ${formattedImageUrl}, stock = ${formattedStock}, description = ${formattedDescription}
             WHERE id = ${req.params.id};
         `;
 
         res.redirect("/admin/products/");
     } catch (error) {
-        const product = {
-            id: req.params.id,
-            name,
-            price,
-            image_url,
-            stock,
-            description,
-        };
-        res.render("admin/products/edit.ejs", {
-            product: product,
+        res.render("error.ejs", {
             errorMessage: error.message,
+            link_url: `/admin/products/edit/${req.params.id}`,
+            page_name: "商品更新ページ",
         });
     }
 });
@@ -168,7 +200,7 @@ app.get("/admin/orders", async (req, res) => {
 
     try {
         const data = await sql`
-            SELECT * FROM orders JOIN products ON orders.product_id = products.id ORDER BY orders.id DESC;
+            SELECT orders.id, products.name, orders.quantity FROM orders JOIN products ON orders.product_id = products.id ORDER BY orders.id DESC;
         `;
 
         orders = data.rows;
@@ -182,30 +214,28 @@ app.get("/admin/orders", async (req, res) => {
     });
 });
 
-app.post("/order", async (req, res) => {
+app.get("/admin/orders/:id", async (req, res) => {
+    let errorMessage = "";
+    let order = {};
+
     try {
-        await sql`BEGIN`;
-
-        const updateStocksResult = await sql`
-            UPDATE products 
-            SET stock = stock - ${quantity} 
-            WHERE id = ${productId}
-            RETURNING stock;
+        const data = await sql`
+            SELECT orders.id, products.name, orders.quantity, products.price, products.image_url, orders.order_date FROM orders JOIN products ON orders.product_id = products.id WHERE orders.id = ${req.params.id};
         `;
 
-        const addOrderResult = await sql`
-            INSERT INTO orders (product_id, quantity, order_date) 
-            VALUES (${productId}, ${quantity}, NOW()) 
-            RETURNING *;
-        `;
+        if (data.rows.length === 0) {
+            throw new Error("注文が見つかりませんでした");
+        }
 
-        await sql`COMMIT`;
-
-        return response.status(201).json({ order: addOrderResult.rows[0] });
+        order = data.rows[0];
     } catch (error) {
-        await sql`ROLLBACK;`;
-        return response.status(500).json({ error: error.message });
+        errorMessage = error.message;
     }
+
+    res.render("admin/orders/show.ejs", {
+        order: order,
+        errorMessage: errorMessage,
+    });
 });
 
 app.listen(3000);

@@ -34,12 +34,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% orders.forEach((product) => { %>
+                    <% orders.forEach((order) => { %>
                     <tr>
-                        <td><%= orders.id %></td>
-                        <td><%= orders.product_name %></td>
-                        <td><%= orders.quantity %></td>
-                        <td><a href="/admin/orders/<%= orders.id %>">詳細</a></td>
+                        <td><%= order.id %></td>
+                        <td><%= order.name %></td>
+                        <td><%= order.quantity %></td>
+                        <td><a href="/admin/orders/<%= order.id %>">詳細</a></td>
                     </tr>
                     <% }) %>
                 </tbody>

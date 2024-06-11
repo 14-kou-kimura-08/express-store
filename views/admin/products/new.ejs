@@ -19,9 +19,6 @@
     </header>
     <main>
         <h1>商品追加</h1>
-        <% if (errorMessage) { %>
-            <div style="color: red;"><%= errorMessage %></div>
-        <% } %>
         <form action="/admin/products/create" method="post">
             <div class="form-group">
                 <label>商品名</label>

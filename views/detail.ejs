@@ -7,7 +7,7 @@
     <title>商品詳細</title>
 
     <!-- /details/detail.cssをstylesheetとして追加 -->
-    <link rel="stylesheet" href="/details/detail.css">
+    <link rel="stylesheet" href="/detail.css">
 </head>
 
 <body>
@@ -27,8 +27,10 @@
                 </div>
             </div>
 
-            <!-- id属性がpurchase-buttonのbutton要素を追加 -->
-            <button id="purchase-button">購入する</button>
+            <form action="/order" method="post">
+                <input type="hidden" name="product_id" value="<%= product.id %>">
+                <button type="submit" class="purchase-button">購入する</button>
+            </form>
         <% } %>
         
     </div>

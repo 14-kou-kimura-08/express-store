@@ -40,7 +40,7 @@ a {
     text-align: right;
 }
 
-#purchase-button {
+.purchase-button {
     background-color: #ffa41c;
     color: #fff;
     border: none;
