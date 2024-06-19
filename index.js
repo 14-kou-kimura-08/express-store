@@ -71,6 +71,16 @@ app.post("/order", async (req, res) => {
     try {
         await sql`BEGIN`;
 
+        const data = await sql`
+            SELECT * FROM products WHERE id = ${product_id};
+        `;
+
+        let product = data.rows[0];
+
+        if (product.stock <= 0) {
+            throw new Error("在庫がありません。");
+        }
+
         await sql`
             UPDATE products
             SET stock = stock - ${quantity} 
