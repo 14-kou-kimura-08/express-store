@@ -40,7 +40,18 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/thanks", async (req, res) => {
-    res.render("thanks.ejs");
+    let products = [];
+
+    try {
+        const data = await sql`
+            SELECT * FROM products ORDER BY id DESC LIMIT 3;
+        `;
+
+        products = data.rows;
+    } catch (error) {
+        console.log(error.message);
+    }
+    res.render("thanks.ejs", { products: products });
 });
 
 app.get("/:id", async (req, res) => {
@@ -49,7 +60,7 @@ app.get("/:id", async (req, res) => {
 
     try {
         const data = await sql`
-            SELECT * FROM products WHERE id = ${req.params.id};;
+            SELECT * FROM products WHERE id = ${req.params.id};
         `;
 
         if (data.rows.length === 0) {
@@ -76,6 +87,7 @@ app.post("/order", async (req, res) => {
             SET stock = stock - ${quantity} 
             WHERE id = ${product_id};
         `;
+
 
         await sql`
             INSERT INTO orders (product_id, quantity, order_date) 
@@ -179,7 +191,7 @@ app.post("/admin/products/update/:id", async (req, res) => {
     try {
         await sql`
             UPDATE products
-            SET name = ${name}, price = ${formattedPrice}, image_url = ${formattedImageUrl}, stock = ${formattedStock}, description = ${formattedDescription}
+            SET name = ${name}, price = ${formattedPrice}, image_url = ${formattedImageUrl}, stock = ${formattedStock}, description = ${formattedDescription},
             WHERE id = ${req.params.id};
         `;
 
