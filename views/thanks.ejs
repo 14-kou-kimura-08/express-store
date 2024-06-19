@@ -9,7 +9,18 @@
 <body>
     <div class="container">
         <h1>購入ありがとうございました</h1>
-        <a href="/" class="back-to-home">商品一覧に戻る</a>
+        <p>その他のおすすめ商品</p>
+        <div id="products">
+            <% products.forEach((product) => { %>
+                <a href="/<%= product.id %>" class="product-card">
+                    <img src="<%= product.image_url %>" alt="<%= product.name %>">
+                    <div class="product-info">
+                        <h2><%= product.name %></h2>
+                        <p><%= product.price %>円(税込)</p>
+                    </div>
+                </a>
+            <% }) %>
+        </div>
     </div>
 </body>
 </html>
