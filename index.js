@@ -28,7 +28,7 @@ app.get("/", async (req, res) => {
 
     try {
         const data = await sql`
-            SELECT * FROM products ORDER BY id DESC;
+            SELECT * FROM products WHERE stock > 0 ORDER BY id DESC;
         `;
 
         products = data.rows;
