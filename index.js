@@ -44,7 +44,7 @@ app.get("/thanks", async (req, res) => {
 
     try {
         const data = await sql`
-            SELECT * FROM products ORDER BY id DESC LIMIT 3;
+            SELECT * FROM products WHERE stock > 0 ORDER BY id DESC LIMIT 3;
         `;
 
         products = data.rows;
