@@ -33,6 +33,7 @@
                         <th>金額</th>
                         <th>画像</th>
                         <th>在庫数</th>
+                        <th>ステータス</th>
                         <th>編集</th>
                     </tr>
                 </thead>
@@ -44,6 +45,7 @@
                         <td><%= product.price %></td>
                         <td><img src="<%= product.image_url %>" alt="<%= product.name %>" class="product-image"></td>
                         <td><%= product.stock %></td>
+                        <td><%= product.status %></td>
                         <td><a href="/admin/products/edit/<%= product.id %>">編集</a></td>
                     </tr>
                     <% }) %>
