@@ -40,7 +40,18 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/thanks", async (req, res) => {
-    res.render("thanks.ejs");
+    let products = [];
+
+    try {
+        const data = await sql`
+            SELECT * FROM products ORDER BY id DESC LIMIT 3;
+        `;
+
+        products = data.rows;
+    } catch (error) {
+        console.log(error.message);
+    }
+    res.render("thanks.ejs", { products: products });
 });
 
 app.get("/:id", async (req, res) => {
